@@ -171,3 +171,5 @@ Additional metrics:
 |--------------------|---------------------:|-----------------:|
 | Actual Non-Sepsis  | 171,979              | 55,331           |
 | Actual Sepsis      | 1,368                | 2,794            |
+
+The Logistic Regression model achieved a sepsis recall of 0.67, indicating that it identified a considerable proportion of actual sepsis observations. However, its precision was low, indicating a high number of false-positive predictions.
