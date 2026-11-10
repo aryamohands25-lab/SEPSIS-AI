@@ -20,23 +20,23 @@ The objective of SEPSIS-AI is to develop a machine learning-based system that an
 The system also aims to make predictions more understandable by incorporating explainability techniques and monitoring changes in patient risk over time.
 
 ## 3. Project Objectives
-Develop machine learning models for early sepsis prediction.
+-Develop machine learning models for early sepsis prediction.
 
-Collect, clean, and preprocess ICU patient data.
+-Collect, clean, and preprocess ICU patient data.
 
-Perform exploratory data analysis and feature engineering.
+-Perform exploratory data analysis and feature engineering.
 
-Implement and compare multiple machine learning algorithms.
+-Implement and compare multiple machine learning algorithms.
 
-Evaluate model performance using appropriate classification metrics.
+-Evaluate model performance using appropriate classification metrics.
 
-Incorporate explainable AI techniques to understand model predictions.
+-Incorporate explainable AI techniques to understand model predictions.
 
-Assess the stability of model explanations.
+-Assess the stability of model explanations.
 
-Monitor changes in patient risk over time.
+-Monitor changes in patient risk over time.
 
-Develop an interactive dashboard for presenting predictions and analysis.
+-Develop an interactive dashboard for presenting predictions and analysis.
 
 ## 4. Dataset Description
 The project uses the PhysioNet/Computing in Cardiology Challenge 2019 dataset.
@@ -47,21 +47,21 @@ The dataset contains hourly clinical observations collected from ICU patients an
 
 Some of the important variables include:
 
-Heart rate
+-Heart rate
 
-Blood pressure
+-Blood pressure
 
-Respiratory rate
+-Respiratory rate
 
-Body temperature
+-Body temperature
 
-Oxygen saturation
+-Oxygen saturation
 
-Laboratory measurements
+-Laboratory measurements
 
-Patient demographics
+-Patient demographics
 
-ICU length of stay
+-ICU length of stay
 
 Sepsis labels
 
@@ -70,29 +70,29 @@ The time-series structure of the dataset allows the analysis of changes in clini
 ## 5. Overall Project Methodology
 The project follows a structured machine learning workflow:
 
-Dataset acquisition and loading.
+-Dataset acquisition and loading.
 
-Data cleaning and preprocessing.
+-Data cleaning and preprocessing.
 
-Missing-value handling.
+-Missing-value handling.
 
-Exploratory Data Analysis (EDA).
+-Exploratory Data Analysis (EDA).
 
-Feature engineering.
+-Feature engineering.
 
-Patient-level data splitting.
+-Patient-level data splitting.
 
-Machine learning model development.
+-Machine learning model development.
 
-Model evaluation and comparison.
+-Model evaluation and comparison.
 
-Explainability using SHAP.
+-Explainability using SHAP.
 
-Explainability Stability Score (ESS).
+-Explainability Stability Score (ESS).
 
-Risk Trajectory Visualization (RTV).
+-Risk Trajectory Visualization (RTV).
 
-Dashboard integration and testing.
+-Dashboard integration and testing.
 
 ## 6. Data Preparation and Machine Learning Models
 ### 6.1 Data Acquisition and Preprocessing
@@ -100,25 +100,25 @@ The PhysioNet 2019 dataset was acquired and processed for machine learning imple
 
 The following activities were performed:
 
-Loaded and integrated the available training datasets.
+-Loaded and integrated the available training datasets.
 
-Cleaned and processed the clinical observations.
+-Cleaned and processed the clinical observations.
 
-Handled missing values using appropriate imputation techniques.
+-Handled missing values using appropriate imputation techniques.
 
-Performed Exploratory Data Analysis (EDA).
+-Performed Exploratory Data Analysis (EDA).
 
-Analysed the distribution of sepsis and non-sepsis observations.
+-Analysed the distribution of sepsis and non-sepsis observations.
 
-Performed feature engineering.
+-Performed feature engineering.
 
-Prepared the dataset for model training.
+-Prepared the dataset for model training.
 
-Created patient-level training, validation, and test splits.
+-Created patient-level training, validation, and test splits.
 
-Prepared feature columns and supporting preprocessing objects.
+-Prepared feature columns and supporting preprocessing objects.
 
-Prepared the data dictionary and data-loading components for application integration.
+-Prepared the data dictionary and data-loading components for application integration.
 
 ### 6.2 Training Data Preparation
 A training sample containing 300,000 observations and 77 features was prepared for model development.
