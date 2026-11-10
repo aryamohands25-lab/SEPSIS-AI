@@ -147,3 +147,12 @@ The implementation involved:
 - Evaluation using precision, recall, F1-score, ROC-AUC, and PR-AUC.
 - Generation of a confusion matrix.
 - Saving the trained model for future application integration.
+
+**Logistic Regression Evaluation Results**
+
+| Metric    | Non-Sepsis (0) | Sepsis (1) |
+|-----------|---------------:|-----------:|
+| Precision | 0.99           | 0.05       |
+| Recall    | 0.76           | 0.67       |
+| F1-score  | 0.86           | 0.09       |
+| Support   | 227,310        | 4,162      |
