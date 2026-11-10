@@ -132,3 +132,6 @@ The class distribution was:
 | **Total**      |            **300,000** |
 
 The dataset exhibited significant class imbalance, with sepsis observations representing a relatively small proportion of the training sample.
+
+This imbalance was considered during model development and evaluation.
+
