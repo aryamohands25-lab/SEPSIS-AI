@@ -20,3 +20,20 @@ The objective of SEPSIS-AI is to develop a machine learning-based system that an
 The system also aims to make predictions more understandable by incorporating explainability techniques and monitoring changes in patient risk over time.
 
 ## 3. Project Objectives
+Develop machine learning models for early sepsis prediction.
+
+Collect, clean, and preprocess ICU patient data.
+
+Perform exploratory data analysis and feature engineering.
+
+Implement and compare multiple machine learning algorithms.
+
+Evaluate model performance using appropriate classification metrics.
+
+Incorporate explainable AI techniques to understand model predictions.
+
+Assess the stability of model explanations.
+
+Monitor changes in patient risk over time.
+
+Develop an interactive dashboard for presenting predictions and analysis.
