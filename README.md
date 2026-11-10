@@ -93,3 +93,7 @@ Explainability Stability Score (ESS).
 Risk Trajectory Visualization (RTV).
 
 Dashboard integration and testing.
+
+## 6. Data Preparation and Machine Learning Models
+### 6.1 Data Acquisition and Preprocessing
+
