@@ -11,3 +11,4 @@ The project integrates machine learning, explainable artificial intelligence (XA
 **Project Domain:** Healthcare AI, Machine Learning and Explainable AI
 
 ## 2. Problem Statement
+Early identification of sepsis in ICU patients is challenging because clinical indicators can change over time, and patient observations may be incomplete or inconsistent.
