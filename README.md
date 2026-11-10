@@ -156,3 +156,11 @@ The implementation involved:
 | Recall    | 0.76           | 0.67       |
 | F1-score  | 0.86           | 0.09       |
 | Support   | 227,310        | 4,162      |
+
+Additional metrics:
+
+- Accuracy: 0.76
+
+- ROC-AUC: 0.7813
+
+- PR-AUC: 0.0726
