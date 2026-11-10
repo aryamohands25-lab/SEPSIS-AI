@@ -122,3 +122,11 @@ Prepared the data dictionary and data-loading components for application integra
 
 ### 6.2 Training Data Preparation
 A training sample containing 300,000 observations and 77 features was prepared for model development.
+
+The class distribution was:
+
+| Sepsis Label   | Number of Observations |
+|----------------|-----------------------:|
+| Non-Sepsis (0) |                294,599 |
+| Sepsis (1)     |                  5,401 |
+| **Total**      |            **300,000** |
