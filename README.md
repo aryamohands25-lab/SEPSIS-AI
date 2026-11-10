@@ -39,4 +39,4 @@ Monitor changes in patient risk over time.
 Develop an interactive dashboard for presenting predictions and analysis.
 
 ## 4. Dataset Description
-
+The project uses the PhysioNet/Computing in Cardiology Challenge 2019 dataset.
