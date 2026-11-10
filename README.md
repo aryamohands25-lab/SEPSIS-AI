@@ -176,3 +176,17 @@ The Logistic Regression model achieved a sepsis recall of 0.67, indicating that 
 
 ### 6.4 Random Forest Model
  Random Forest was implemented as an ensemble-based classification model to capture more complex relationships between clinical features.
+
+The implementation involved:
+
+- Model development and hyperparameter tuning.
+- Training using the prepared dataset.
+- Validation and performance evaluation.
+
+- Generation of feature importance results.
+
+- Saving the trained model.
+
+- Preparing model outputs for explainability and application integration.
+
+  
