@@ -180,7 +180,9 @@ The Logistic Regression model achieved a sepsis recall of 0.67, indicating that 
 The implementation involved:
 
 - Model development and hyperparameter tuning.
+  
 - Training using the prepared dataset.
+  
 - Validation and performance evaluation.
 
 - Generation of feature importance results.
@@ -189,4 +191,11 @@ The implementation involved:
 
 - Preparing model outputs for explainability and application integration.
 
-  
+ **Random Forest Evaluation Results**
+
+| Metric    | Non-Sepsis (0) | Sepsis (1) |
+|-----------|---------------:|-----------:|
+| Precision | 0.99           | 0.10       |
+| Recall    | 0.96           | 0.24       |
+| F1-score  | 0.97           | 0.15       |
+| Support   | 227,310        | 4,162      |
