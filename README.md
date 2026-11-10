@@ -135,3 +135,6 @@ The dataset exhibited significant class imbalance, with sepsis observations repr
 
 This imbalance was considered during model development and evaluation.
 
+### 6.3 Logistic Regression
+
+Logistic Regression was implemented as a baseline classification model for predicting sepsis risk.
