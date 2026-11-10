@@ -17,3 +17,4 @@ Traditional approaches may not always capture complex relationships between clin
 
 The objective of SEPSIS-AI is to develop a machine learning-based system that analyses routinely collected ICU data to identify potential sepsis risk at an early stage.
 
+The system also aims to make predictions more understandable by incorporating explainability techniques and monitoring changes in patient risk over time.
