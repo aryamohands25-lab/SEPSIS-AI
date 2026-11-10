@@ -138,3 +138,12 @@ This imbalance was considered during model development and evaluation.
 ### 6.3 Logistic Regression
 
 Logistic Regression was implemented as a baseline classification model for predicting sepsis risk.
+
+The implementation involved:
+
+- Model training using the prepared clinical features.
+- Model configuration and tuning.
+- Validation using the validation dataset.
+- Evaluation using precision, recall, F1-score, ROC-AUC, and PR-AUC.
+- Generation of a confusion matrix.
+- Saving the trained model for future application integration.
