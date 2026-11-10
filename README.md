@@ -211,3 +211,7 @@ The implementation involved:
 |--------------------|---------------------:|-----------------:|
 | Actual Non-Sepsis  | 218,617              | 8,693            |
 | Actual Sepsis      | 3,151                | 1,011            |
+
+**Interpretation:**
+
+The Random Forest model achieved a higher ROC-AUC (0.7954) and overall accuracy (0.95) than Logistic Regression. However, its recall for sepsis cases was lower (0.24 compared to 0.67), indicating that it missed a larger proportion of actual sepsis observations.
