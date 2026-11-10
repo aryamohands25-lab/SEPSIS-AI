@@ -204,3 +204,10 @@ The implementation involved:
 - Accuracy: 0.95
 - ROC-AUC: 0.7954
 - PR-AUC: 0.0711
+
+**Confusion Matrix**
+
+| Actual Class       | Predicted Non-Sepsis | Predicted Sepsis |
+|--------------------|---------------------:|-----------------:|
+| Actual Non-Sepsis  | 218,617              | 8,693            |
+| Actual Sepsis      | 3,151                | 1,011            |
