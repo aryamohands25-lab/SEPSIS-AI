@@ -66,3 +66,5 @@ ICU length of stay
 Sepsis labels
 
 The time-series structure of the dataset allows the analysis of changes in clinical measurements over time.
+
+## 5. Overall Project Methodology
