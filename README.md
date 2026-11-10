@@ -9,3 +9,5 @@ This project uses clinical measurements and patient data collected over time to 
 The project integrates machine learning, explainable artificial intelligence (XAI), risk assessment, and an interactive dashboard.
 
 **Project Domain:** Healthcare AI, Machine Learning and Explainable AI
+
+## 2. Problem Statement
