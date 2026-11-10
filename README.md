@@ -119,3 +119,6 @@ Created patient-level training, validation, and test splits.
 Prepared feature columns and supporting preprocessing objects.
 
 Prepared the data dictionary and data-loading components for application integration.
+
+### 6.2 Training Data Preparation
+
