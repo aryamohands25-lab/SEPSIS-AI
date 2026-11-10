@@ -68,3 +68,28 @@ Sepsis labels
 The time-series structure of the dataset allows the analysis of changes in clinical measurements over time.
 
 ## 5. Overall Project Methodology
+The project follows a structured machine learning workflow:
+
+Dataset acquisition and loading.
+
+Data cleaning and preprocessing.
+
+Missing-value handling.
+
+Exploratory Data Analysis (EDA).
+
+Feature engineering.
+
+Patient-level data splitting.
+
+Machine learning model development.
+
+Model evaluation and comparison.
+
+Explainability using SHAP.
+
+Explainability Stability Score (ESS).
+
+Risk Trajectory Visualization (RTV).
+
+Dashboard integration and testing.
