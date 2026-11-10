@@ -130,3 +130,5 @@ The class distribution was:
 | Non-Sepsis (0) |                294,599 |
 | Sepsis (1)     |                  5,401 |
 | **Total**      |            **300,000** |
+
+The dataset exhibited significant class imbalance, with sepsis observations representing a relatively small proportion of the training sample.
