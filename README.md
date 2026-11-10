@@ -14,3 +14,6 @@ The project integrates machine learning, explainable artificial intelligence (XA
 Early identification of sepsis in ICU patients is challenging because clinical indicators can change over time, and patient observations may be incomplete or inconsistent.
 
 Traditional approaches may not always capture complex relationships between clinical variables or changes in patient conditions.
+
+The objective of SEPSIS-AI is to develop a machine learning-based system that analyses routinely collected ICU data to identify potential sepsis risk at an early stage.
+
