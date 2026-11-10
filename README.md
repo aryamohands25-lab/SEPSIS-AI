@@ -165,3 +165,9 @@ Additional metrics:
 
 - PR-AUC: 0.0726
 
+**Confusion Matrix**
+
+| Actual Class       | Predicted Non-Sepsis | Predicted Sepsis |
+|--------------------|---------------------:|-----------------:|
+| Actual Non-Sepsis  | 171,979              | 55,331           |
+| Actual Sepsis      | 1,368                | 2,794            |
