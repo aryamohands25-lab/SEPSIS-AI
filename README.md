@@ -175,3 +175,4 @@ Additional metrics:
 The Logistic Regression model achieved a sepsis recall of 0.67, indicating that it identified a considerable proportion of actual sepsis observations. However, its precision was low, indicating a high number of false-positive predictions.
 
 ### 6.4 Random Forest Model
+ Random Forest was implemented as an ensemble-based classification model to capture more complex relationships between clinical features.
