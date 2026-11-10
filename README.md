@@ -121,4 +121,4 @@ Prepared feature columns and supporting preprocessing objects.
 Prepared the data dictionary and data-loading components for application integration.
 
 ### 6.2 Training Data Preparation
-
+A training sample containing 300,000 observations and 77 features was prepared for model development.
