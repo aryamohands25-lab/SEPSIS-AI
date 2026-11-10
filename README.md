@@ -97,3 +97,25 @@ Dashboard integration and testing.
 ## 6. Data Preparation and Machine Learning Models
 ### 6.1 Data Acquisition and Preprocessing
 The PhysioNet 2019 dataset was acquired and processed for machine learning implementation.
+
+The following activities were performed:
+
+Loaded and integrated the available training datasets.
+
+Cleaned and processed the clinical observations.
+
+Handled missing values using appropriate imputation techniques.
+
+Performed Exploratory Data Analysis (EDA).
+
+Analysed the distribution of sepsis and non-sepsis observations.
+
+Performed feature engineering.
+
+Prepared the dataset for model training.
+
+Created patient-level training, validation, and test splits.
+
+Prepared feature columns and supporting preprocessing objects.
+
+Prepared the data dictionary and data-loading components for application integration.
