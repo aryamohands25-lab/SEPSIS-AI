@@ -41,9 +41,28 @@ Develop an interactive dashboard for presenting predictions and analysis.
 ## 4. Dataset Description
 The project uses the PhysioNet/Computing in Cardiology Challenge 2019 dataset.
 
-The project uses the PhysioNet/Computing in Cardiology Challenge 2019 dataset.
-
 Dataset source: https://physionet.org/content/challenge-2019/1.0.0/
 
 The dataset contains hourly clinical observations collected from ICU patients and includes physiological measurements, laboratory results, demographic information, and sepsis labels.
 
+Some of the important variables include:
+
+Heart rate
+
+Blood pressure
+
+Respiratory rate
+
+Body temperature
+
+Oxygen saturation
+
+Laboratory measurements
+
+Patient demographics
+
+ICU length of stay
+
+Sepsis labels
+
+The time-series structure of the dataset allows the analysis of changes in clinical measurements over time.
