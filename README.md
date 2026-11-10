@@ -40,3 +40,8 @@ Develop an interactive dashboard for presenting predictions and analysis.
 
 ## 4. Dataset Description
 The project uses the PhysioNet/Computing in Cardiology Challenge 2019 dataset.
+
+The project uses the PhysioNet/Computing in Cardiology Challenge 2019 dataset.
+
+Dataset source: https://physionet.org/content/challenge-2019/1.0.0/
+
