@@ -1,0 +1,31 @@
+{
+  "lr": {
+    "C": 0.01,
+    "val_auprc": 0.044338381307594044,
+    "threshold": 0.013863284386573499,
+    "train_seconds": 17
+  },
+  "rf": {
+    "max_depth": 10,
+    "min_samples_leaf": 20,
+    "val_auprc": 0.04386362355860714,
+    "threshold": 0.015743216125240257,
+    "train_seconds": 1
+  },
+  "xgb": {
+    "params": {
+      "learning_rate": 0.1,
+      "max_depth": 7,
+      "min_child_weight": 1,
+      "subsample": 0.8,
+      "colsample_bytree": 1.0,
+      "reg_lambda": 10.0,
+      "gamma": 0.0
+    },
+    "best_rounds": 3,
+    "scale_pos_weight": 59.947513812154696,
+    "val_auprc": 0.0385198755516875,
+    "threshold": 0.012924979758965869,
+    "train_seconds": 2
+  }
+}

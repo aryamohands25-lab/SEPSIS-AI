@@ -1,0 +1,28 @@
+{
+  "patients": 40336,
+  "rows": 1552210,
+  "pct_septic_patients": 7.27,
+  "pct_positive_rows": 1.8,
+  "mean_stay_hours": 38.5,
+  "cleaning_log": {
+    "rows_in": 1552210,
+    "patients_in": 40336,
+    "duplicate_rows_removed": 0,
+    "values_set_to_nan": {
+      "HR": 0,
+      "O2Sat": 0,
+      "Temp": 6,
+      "SBP": 35,
+      "MAP": 201,
+      "DBP": 103,
+      "Resp": 1310,
+      "EtCO2": 0,
+      "pH": 0,
+      "Lactate": 0,
+      "Glucose": 0
+    },
+    "one_hour_patients_removed": 0,
+    "rows_out": 1552210,
+    "patients_out": 40336
+  }
+}

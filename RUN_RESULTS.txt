@@ -1,0 +1,45 @@
+SEPSIS-AI — EXECUTION SUMMARY
+============================
+
+Input datasets
+- training_setA.csv: 790,215 data rows
+- training_setB.csv: 761,995 data rows
+- Combined: 1,552,210 rows across 40,336 patients
+- Septic patients: 7.27%
+- Positive hourly rows: 1.80%
+
+Preprocessing
+- Patient-level split: train 28,235 patients / 1,086,436 rows
+- Validation: 6,050 patients / 231,472 rows
+- Test: 6,051 patients / 234,302 rows
+- 115 features retained; 3 very sparse raw lab columns removed
+- Feature construction uses current/past observations only
+
+Quick-run model results (held-out test set)
+Model                    AUROC    AUPRC    Recall   Precision
+Logistic Regression      0.7070   0.0506   0.7780   0.0264
+Random Forest            0.7318   0.0457   0.8128   0.0298
+XGBoost                  0.6997   0.0462   0.8119   0.0294
+qSOFA (>=2 of 2)         0.5890   0.0231   0.0727   0.0367
+SIRS (>=2 of 4)          0.6534   0.0315   0.5272   0.0326
+
+Other completed steps
+- SHAP global importance and local waterfall explanations generated
+- Explanation Stability Score (ESS) analysis generated (100-row quick sample)
+- Real-time warning / lead-time analysis generated
+- Unit tests: 2 passed
+
+Important interpretation
+This archive contains a QUICK-RUN / smoke-test training configuration to make
+execution feasible in a constrained environment. The training split was
+subsampled to 2% of train patients for model fitting; validation and test
+metrics were calculated on their full patient-level splits. These results are
+for pipeline verification, not final clinical claims or publication. Run
+`python run_all.py` without SEPSIS_FAST=1 for the full training experiment.
+
+Runtime compatibility
+The execution environment did not have pyarrow/fastparquet and had no network
+access to install them. Data files with `.parquet` suffix in this archive were
+therefore stored as pickle and are read through `src.config.read_table()`.
+Install requirements (including pyarrow) for normal Parquet output on your
+computer. The helper also reads the prepared pickle fallback files.
