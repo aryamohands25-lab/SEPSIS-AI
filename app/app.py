@@ -50,20 +50,14 @@ def load_tables():
         else None
     )
 
-    test = C.read_table(
-        C.DATA_PROC / "test.parquet",
-        columns=[
-            "patient_id",
-            "hour",
-            "label",
-            "HR",
-            "Temp",
-            "Resp",
-            "SBP",
-            "MAP",
-            "O2Sat"
-        ]
-    )
+    demo_path = C.ROOT / "demo_data" / "test.pkl"
+    test = pd.read_pickle(demo_path)
+
+    demo_ids = test["patient_id"].unique()
+    rs = rs[rs["patient_id"].isin(demo_ids)].copy()
+
+    if ess is not None and "patient_id" in ess.columns:
+        ess = ess[ess["patient_id"].isin(demo_ids)].copy()
 
     return rs, ess, test
 
@@ -284,7 +278,7 @@ elif page == "Risk trajectory (RTV)":
         f"What changed in the last 6 hours (hour {hour})"
     )
 
-    w = what_changed(pid, hour)
+    w = what_changed(pid, hour, split="demo")
 
     c1, c2 = st.columns(2)
 
@@ -314,8 +308,9 @@ elif page == "Risk trajectory (RTV)":
 elif page == "Explanation (SHAP + ESS)":
 
     st.title("Model Explanation")
+    e = explain(pid, hour, split="demo")
 
-    e = explain(pid, hour)
+
 
     top = (
         e["shap"]

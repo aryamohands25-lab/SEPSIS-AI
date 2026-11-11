@@ -24,6 +24,8 @@ def _artifacts():
 
 @functools.lru_cache(maxsize=2)
 def _frame(split="test"):
+    if split == "demo":
+        return pd.read_pickle(C.ROOT / "demo_data" / "test.pkl")
     return C.read_table(C.DATA_PROC / f"{split}.parquet")
 
 
