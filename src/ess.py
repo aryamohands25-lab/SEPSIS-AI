@@ -63,7 +63,7 @@ def main():
     model, expl, feats = _artifacts()
     thr = load_thresholds()["xgb"]
     info = json.loads((C.MODELS / "train_info.json").read_text())["xgb"]
-    test = _frame("test")
+    test = _frame("val")
     s = choose_sample(test, model, feats, C.ESS_SAMPLE)
     X = s[feats]
     ref = expl.shap_values(X)
@@ -82,7 +82,7 @@ def main():
         print(f"  seed {sd} done")
 
     rng = np.random.RandomState(C.SEED)                      # (4) input noise
-    sd_ = Xtr.std().to_numpy()
+    sd_ = Xtr.sample(n=min(50000, len(Xtr)), random_state=C.SEED).std().to_numpy()
     lo, hi = Xtr.min().to_numpy(), Xtr.max().to_numpy()
     continuous = np.array([Xtr[c].nunique() > 2 for c in feats])   # skip binary flags
     for _ in range(C.ESS_NOISE_REPS):
@@ -154,3 +154,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+

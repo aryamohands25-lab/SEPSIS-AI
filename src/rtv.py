@@ -1,12 +1,12 @@
 """Novelty 2 - Risk Trajectory View (RTV).
 
     python -m src.rtv
-Hour-by-hour risk for every patient, first-alert hour, lead time vs. onset,
+Hour-by-hour risk for every patient, first-alert hour, lead time vs. first positive challenge label,
 comparison with qSOFA/SIRS, alert-budget table and the 'what changed in the
 last 6 hours' explanation (SHAP difference).
 
-'Onset' = first hour with SepsisLabel = 1 (the Challenge label already turns
-positive ~6 h before clinical sepsis onset - state this in the report).
+'First positive label hour' = first hour with SepsisLabel = 1 (the Challenge label turns
+positive approximately 6 h before clinical sepsis onset; this is not the actual clinical onset).
 """
 import numpy as np
 import pandas as pd
@@ -45,14 +45,14 @@ def first_alert_hours(rs, flag):
     return rs[flag].groupby("patient_id")["hour"].min()
 
 
-def onset_hours(rs):
+def first_positive_label_hours(rs):
     return rs[rs.label == 1].groupby("patient_id")["hour"].min()
 
 
 def alert_metrics(rs, flag, name=""):
-    onset, t_alert = onset_hours(rs), first_alert_hours(rs, flag)
-    sepsis_ids = onset.index
-    lead = (onset - t_alert.reindex(sepsis_ids))           # NaN = never alerted
+    first_label, t_alert = first_positive_label_hours(rs), first_alert_hours(rs, flag)
+    sepsis_ids = first_label.index
+    lead = (first_label - t_alert.reindex(sepsis_ids))           # NaN = never alerted
     n = len(sepsis_ids)
     # false alerts: alert EPISODES (rising edges) on non-septic patients per 10 patient-days
     prev = pd.Series(flag, index=rs.index).groupby(rs.patient_id).shift(1, fill_value=False)
@@ -64,7 +64,7 @@ def alert_metrics(rs, flag, name=""):
          "alerted_>=1h_before_%": 100 * (lead >= 1).mean(),
          "alerted_>=3h_before_%": 100 * (lead >= 3).mean(),
          "alerted_>=6h_before_%": 100 * (lead >= 6).mean(),
-         "median_lead_h": lead.median(),
+         "median_hours_before_first_positive_label": lead.median(),
          "false_alerts_per_10_patient_days": 10 * edges[ns].sum() / patient_days}
     return m, lead
 
@@ -80,7 +80,7 @@ def threshold_for_budget(rs_val, budget, consecutive=C.ALERT_CONSECUTIVE):
 
 
 # ------------------------------------------------------------ what changed
-def what_changed(patient_id, hour, lookback=6, split="test", top=5):
+def what_changed(patient_id, hour, lookback=6, split="val", top=5):
     """SHAP is additive, so SHAP(t) - SHAP(t-6) tells which features moved the risk."""
     df = _frame(split)
     p = df[df.patient_id == patient_id].set_index("hour")
@@ -110,7 +110,7 @@ def plot_patient(rs, pid, thr, flag, path, title=""):
         ta = p.hour[fl].min(); ax.axvline(ta, color="r"); ax.axvspan(ta, p.hour.max(), color="r", alpha=.08)
         ax.text(ta, ax.get_ylim()[1] * .92, " first alert", color="r")
     if (p.label == 1).any():
-        ax.axvline(p.hour[p.label == 1].min(), color="g", ls=":", label="onset (label=1)")
+        ax.axvline(p.hour[p.label == 1].min(), color="g", ls=":", label="first positive label")
     ax.set(title=f"{title} {pid}", xlabel="ICU hour", ylabel="calibrated risk"); ax.legend()
     plt.tight_layout(); plt.savefig(path, dpi=140); plt.close()
 
@@ -147,13 +147,13 @@ def main():
     print("\nAlert-budget table:\n", bt.round(3).to_string(index=False))
 
     # four example patients (early catch, late catch, missed, false alarm)
-    onset = onset_hours(test); ta = first_alert_hours(test, flag_t)
-    lead = (onset - ta.reindex(onset.index))
+    first_label = first_positive_label_hours(test); ta = first_alert_hours(test, flag_t)
+    lead = (first_label - ta.reindex(first_label.index))
     first_hour = test.groupby("patient_id")["hour"].min()
     late_start = ta.index[(ta - first_hour.reindex(ta.index)) >= 6]      # alert after >=6 h of data
     ex = {"early_catch": lead[(lead >= 6) & lead.index.isin(late_start)].index[:1], "late_catch": lead[lead <= 0].index[:1],
           "missed_case": lead[lead.isna()].index[:1],
-          "false_alarm": ta.index.difference(onset.index)[:1]}
+          "false_alarm": ta.index.difference(first_label.index)[:1]}
     for k, ids in ex.items():
         if len(ids):
             plot_patient(test, ids[0], thr, flag_t, C.FIGURES / f"rtv_{k}.png", k.replace("_", " "))

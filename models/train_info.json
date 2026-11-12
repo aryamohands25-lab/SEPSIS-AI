@@ -1,31 +1,43 @@
 {
   "lr": {
-    "C": 0.01,
-    "val_auprc": 0.044338381307594044,
-    "threshold": 0.013863284386573499,
-    "train_seconds": 17
+    "C": 10,
+    "val_auprc": 0.0792383073160792,
+    "threshold": 0.013195312581956387,
+    "train_seconds": 108,
+    "train_patients": 28235,
+    "train_rows": 1086436,
+    "fast_mode": false,
+    "scikit_learn_version": "1.9.1"
   },
   "rf": {
-    "max_depth": 10,
+    "max_depth": 8,
     "min_samples_leaf": 20,
-    "val_auprc": 0.04386362355860714,
-    "threshold": 0.015743216125240257,
-    "train_seconds": 1
+    "val_auprc": 0.08679920309811961,
+    "threshold": 0.013640777100613654,
+    "train_seconds": 524,
+    "train_patients": 28235,
+    "train_rows": 1086436,
+    "fast_mode": false,
+    "scikit_learn_version": "1.9.1"
   },
   "xgb": {
     "params": {
-      "learning_rate": 0.1,
-      "max_depth": 7,
-      "min_child_weight": 1,
+      "learning_rate": 0.08,
+      "max_depth": 5,
+      "min_child_weight": 20,
       "subsample": 0.8,
-      "colsample_bytree": 1.0,
-      "reg_lambda": 10.0,
-      "gamma": 0.0
+      "colsample_bytree": 0.8,
+      "reg_lambda": 1.0,
+      "gamma": 1.0
     },
-    "best_rounds": 3,
-    "scale_pos_weight": 59.947513812154696,
-    "val_auprc": 0.0385198755516875,
-    "threshold": 0.012924979758965869,
-    "train_seconds": 2
+    "best_rounds": 162,
+    "scale_pos_weight": 54.543762781186096,
+    "val_auprc": 0.10081037687102727,
+    "threshold": 0.015079467557370663,
+    "train_seconds": 1313,
+    "train_patients": 28235,
+    "train_rows": 1086436,
+    "fast_mode": false,
+    "scikit_learn_version": "1.9.1"
   }
 }

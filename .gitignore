@@ -5,3 +5,38 @@ __pycache__/
 data/raw/
 data/processed/
 data/splits/
+
+# Local model backups
+models/backup-*/
+
+# Patient-level outputs ? do not publish
+results/tables/risk_series*.parquet
+results/tables/ess_scores.parquet
+results/tables/shap_sample.npz
+
+# Individual patient explanation plots
+results/figures/shap_waterfall_*.png
+
+# Do not publish trained model weights before checking dataset terms
+models/*.joblib
+
+# Keep test-derived and patient-level outputs private
+results/tables/*test*
+results/tables/risk_series*.parquet
+results/tables/ess_scores.parquet
+results/tables/ess_unstable_features.csv
+results/tables/shap_sample.npz
+results/tables/rtv_lead_time.csv
+
+# Test and patient-specific figures
+results/figures/*test*
+results/figures/rtv_*.png
+results/figures/ess_*.png
+
+# Old source backups
+src/*.backup
+src/*.memory_backup
+src/*.before_label_fix
+
+# Local execution log
+RUN_RESULTS.txt
