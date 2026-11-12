@@ -1,4 +1,4 @@
-# SEPSIS-AI ? Explainable Early Sepsis Risk Prediction
+# SEPSIS-AI - Explainable Early Sepsis Risk Prediction
 
 An academic machine-learning prototype for hourly sepsis-risk prediction using ICU patient data. The project compares Logistic Regression, Random Forest and XGBoost, with probability calibration, SHAP explanations, explanation-stability analysis and risk-trajectory monitoring.
 
