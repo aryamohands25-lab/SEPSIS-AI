@@ -24,8 +24,6 @@ def _artifacts():
 
 @functools.lru_cache(maxsize=2)
 def _frame(split="test"):
-    if split == "demo":
-        return pd.read_pickle(C.ROOT / "demo_data" / "test.pkl")
     return C.read_table(C.DATA_PROC / f"{split}.parquet")
 
 
@@ -35,7 +33,7 @@ def shap_values(X: pd.DataFrame) -> np.ndarray:
     return expl.shap_values(X[feats])
 
 
-def explain(patient_id: str, hour: int, split: str = "test") -> dict:
+def explain(patient_id: str, hour: int, split: str = "val") -> dict:
     model, expl, feats = _artifacts()
     df = _frame(split)
     row = df[(df.patient_id == patient_id) & (df.hour == hour)]
@@ -71,7 +69,7 @@ def _waterfall(e, title, path):
 def main():
     model, expl, feats = _artifacts()
     thr = load_thresholds()["xgb"]
-    df = _frame("test")
+    df = _frame("val")
     s = sample_rows(df, C.SHAP_SAMPLE)
     X = s[feats]
     sv = expl.shap_values(X)
@@ -96,9 +94,10 @@ def main():
         if len(idx) == 0:
             continue
         i = idx[np.argmax(risk[idx])] if name.startswith("high") else idx[np.argmin(risk[idx])] if name.startswith("low") else idx[np.argmax(risk[idx])]
-        _waterfall(explain(s.patient_id[i], int(s.hour[i])), name.replace("_", " "), C.FIGURES / f"shap_waterfall_{name}.png")
+        _waterfall(explain(s.patient_id[i], int(s.hour[i]), split="val"), name.replace("_", " "), C.FIGURES / f"shap_waterfall_{name}.png")
     print("saved SHAP figures to", C.FIGURES)
 
 
 if __name__ == "__main__":
     main()
+

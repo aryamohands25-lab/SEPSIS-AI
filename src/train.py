@@ -9,6 +9,7 @@ import time
 import joblib
 import numpy as np
 import pandas as pd
+import sklearn
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import average_precision_score, roc_auc_score
@@ -96,9 +97,18 @@ def train_xgb(Xtr, ytr, Xva, yva):
 def main():
     mtr, Xtr, ytr = load_split("train")
     mva, Xva, yva = load_split("val")
+    train_patients = int(mtr["patient_id"].nunique())
     if C.FAST:
         Xtr, ytr = _subsample_patients(mtr, Xtr, ytr, C.FAST_TRAIN_PATIENT_FRAC)
-        print(f"FAST mode: training on {len(Xtr)} rows")
+        train_patients = int(mtr["patient_id"].nunique() * C.FAST_TRAIN_PATIENT_FRAC)
+        print(f"FAST mode: training on a patient subset; {len(Xtr)} rows")
+    else:
+        expected_patients = len((C.DATA_SPLITS / "train_ids.txt").read_text().split())
+        if train_patients != expected_patients:
+            raise ValueError(
+                f"Training data contains {train_patients} patients; "
+                f"expected {expected_patients} from train_ids.txt."
+            )
     print(f"train {Xtr.shape}, positives {ytr.mean():.3%}")
 
     trainers = {"lr": train_lr, "rf": train_rf, "xgb": train_xgb}
@@ -110,7 +120,15 @@ def main():
         model = CalibratedModel(base, name).fit_calibration(Xva, yva)
         thr = choose_threshold(yva, model.predict_proba(Xva))
         thresholds[name] = thr
-        info[name] = {**meta_info, "threshold": thr, "train_seconds": round(time.time() - t0)}
+        info[name] = {
+            **meta_info,
+            "threshold": thr,
+            "train_seconds": round(time.time() - t0),
+            "train_patients": train_patients,
+            "train_rows": len(Xtr),
+            "fast_mode": C.FAST,
+            "scikit_learn_version": sklearn.__version__,
+        }
         joblib.dump(model, C.MODELS / f"{name}.joblib")
         print(f"  saved {name}; threshold (recall>={C.RECALL_TARGET}) = {thr:.4f}")
 

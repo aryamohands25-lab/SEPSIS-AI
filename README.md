@@ -1,219 +1,216 @@
-# SEPSIS-AI: An Explainable and Risk-Aware Early Sepsis Prediction System
-## 1. Project Overview
-SEPSIS-AI is a machine learning-based clinical decision support system designed to support the early identification of sepsis in Intensive Care Unit (ICU) patients.
+# SEPSIS-AI ? Explainable Early Sepsis Risk Prediction
 
-Sepsis is a life-threatening condition that occurs when the body's response to an infection causes damage to its own tissues and organs. Early identification is essential for timely clinical intervention and improved patient outcomes.
+An academic machine-learning prototype for hourly sepsis-risk prediction using ICU patient data. The project compares Logistic Regression, Random Forest and XGBoost, with probability calibration, SHAP explanations, explanation-stability analysis and risk-trajectory monitoring.
 
-This project uses clinical measurements and patient data collected over time to develop machine learning models that predict sepsis risk. The system aims to combine predictive modelling with explainability and risk monitoring to provide more interpretable and informative predictions.
+> **Disclaimer:** This is a research and educational prototype. It is not clinically validated and must not be used to diagnose, treat or make decisions about patients.
 
-The project integrates machine learning, explainable artificial intelligence (XAI), risk assessment, and an interactive dashboard.
+## 1. Project workflow
 
-**Project Domain:** Healthcare AI, Machine Learning and Explainable AI
+Raw ICU data ? cleaning ? temporal feature engineering ? patient-level splitting ? model training ? validation and calibration ? SHAP explanations ? Explanation Stability Score (ESS) ? Risk Trajectory Visualization (RTV).
 
-## 2. Problem Statement
-Early identification of sepsis in ICU patients is challenging because clinical indicators can change over time, and patient observations may be incomplete or inconsistent.
+## 2. Dataset and splitting
 
-Traditional approaches may not always capture complex relationships between clinical variables or changes in patient conditions.
+- Uses the PhysioNet/CinC Challenge 2019 training datasets (Set A and Set B).
+- Combined cohort: **40,336 patients**.
+- Patient-level stratified split: 70% training, 15% validation and 15% test.
+- Random seed: 42.
+- No patient overlap between the three splits.
 
-The objective of SEPSIS-AI is to develop a machine learning-based system that analyses routinely collected ICU data to identify potential sepsis risk at an early stage.
+| Split | Patients | Processed rows |
+|---|---:|---:|
+| Train | 28,235 | 1,086,436 |
+| Validation | 6,050 | 231,472 |
+| Test | 6,051 | 234,302 |
 
-The system also aims to make predictions more understandable by incorporating explainability techniques and monitoring changes in patient risk over time.
+### Data-integrity checks
 
-## 3. Project Objectives
--Develop machine learning models for early sepsis prediction.
+- Patient IDs in processed train and validation data were verified against their saved split assignments.
+- All 6,051 test patients were also verified against the test split assignment.
+- Hourly continuity was checked in all three processed splits:
+  - Train: 1,058,201 adjacent intervals; all exactly one hour.
+  - Validation: 225,422 adjacent intervals; all exactly one hour.
+  - Test: 228,251 adjacent intervals; all exactly one hour.
+- No gaps, duplicate hours or reversed hours were found in these adjacent intervals.
 
-- Collect, clean, and preprocess ICU patient data.
+## 3. Temporal feature engineering
 
-- Perform exploratory data analysis and feature engineering.
+Features are constructed using the current hour and earlier observations from the same patient.
 
-- Implement and compare multiple machine learning algorithms.
+- Forward filling is performed within each patient.
+- Rolling means, minima, maxima and standard deviations.
+- Temporal slopes and changes over the configured observation window.
+- qSOFA-style and SIRS-style component scores.
+- Laboratory measurement recency and measured-in-last-24-hours indicators.
+- Missing values are imputed using medians learned from training data.
 
-- Evaluate model performance using appropriate classification metrics.
+The preprocessing pipeline learns its dropped columns and imputation medians from training data only.
 
-- Incorporate explainable AI techniques to understand model predictions.
+The hourly-continuity audit supports interpreting row-based lag windows as consecutive hourly windows in the processed splits.
 
-- Assess the stability of model explanations.
+## 4. Models and validation results
 
-- Monitor changes in patient risk over time.
+Three machine-learning models were trained and compared:
 
-- Develop an interactive dashboard for presenting predictions and analysis.
+- Logistic Regression (LR)
+- Random Forest (RF)
+- XGBoost (XGB)
 
-## 4. Dataset Description
-The project uses the PhysioNet/Computing in Cardiology Challenge 2019 dataset.
+Probability calibration uses Platt scaling fitted on validation data. Model selection and threshold selection also use validation data.
 
-Dataset source: https://physionet.org/content/challenge-2019/1.0.0/
+### Validation performance
 
-The dataset contains hourly clinical observations collected from ICU patients and includes physiological measurements, laboratory results, demographic information, and sepsis labels.
+| Model | AUROC | AUPRC | Recall | Precision |
+|---|---:|---:|---:|---:|
+| Logistic Regression | 0.7874 | 0.0792 | 0.8001 | 0.0366 |
+| Random Forest | 0.8127 | 0.0868 | 0.8001 | 0.0413 |
+| XGBoost | 0.8309 | 0.1008 | 0.8001 | 0.0496 |
 
-Some of the important variables include:
+The validation positive-label prevalence is approximately 1.8%. XGBoost achieved the highest validation AUROC and AUPRC among these three models.
 
-- Heart rate
+The selected validation recall target was 0.80. At this operating point, precision is low, indicating a substantial false-alert burden. These results do not establish clinical utility.
 
-- Blood pressure
+## 5. Clinical baseline comparison
 
-- Respiratory rate
+The project compares model predictions with:
 
-- Body temperature
+- qSOFA-style score ? 2
+- SIRS-style score ? 2
 
-- Oxygen saturation
+The qSOFA-style score uses respiratory rate and systolic blood pressure because GCS is unavailable in the dataset. It is therefore not a complete qSOFA implementation.
 
-- Laboratory measurements
+Validation results:
 
-- Patient demographics
+| Method | AUROC | AUPRC |
+|---|---:|---:|
+| XGBoost | 0.8309 | 0.1008 |
+| qSOFA-style ? 2 | 0.5736 | 0.0221 |
+| SIRS-style ? 2 | 0.6279 | 0.0289 |
 
-- ICU length of stay
+## 6. Explainability ? SHAP
 
-- Sepsis labels
+SHAP is used to explain the raw XGBoost model output.
 
-The time-series structure of the dataset allows the analysis of changes in clinical measurements over time.
+The project provides:
+- Global feature-importance rankings.
+- SHAP summary and beeswarm plots.
+- Patient-level waterfall explanations.
+- A six-hour feature-change explanation.
 
-## 5. Overall Project Methodology
-The project follows a structured machine learning workflow:
+**Important:** SHAP values explain the raw model margin (log-odds), not the final Platt-calibrated probability directly.
 
-- Dataset acquisition and loading.
+## 7. Explanation Stability Score (ESS)
 
-- Data cleaning and preprocessing.
+ESS evaluates how consistently explanations behave under repeated perturbations of engineered features.
 
-- Missing-value handling.
+Recorded validation analysis:
+- Mean ESS: approximately 0.8275.
+- Standard deviation: approximately 0.0455.
+- Median ESS: approximately 0.8287.
 
-- Exploratory Data Analysis (EDA).
+ESS measures explanation stability, not prediction correctness or clinical reliability. The perturbation approach can also create slightly inconsistent combinations of engineered features.
 
-- Feature engineering.
+## 8. Risk Trajectory Visualization (RTV)
 
-- Patient-level data splitting.
+The RTV component is designed to provide:
 
-- Machine learning model development.
+- Hour-by-hour predicted risk for each patient.
+- First alert hour.
+- Lead time relative to the first positive challenge label.
+- Comparison with qSOFA-style and SIRS-style rules.
+- Alert-budget threshold analysis.
+- Patient-level risk trajectory plots.
+- A six-hour SHAP difference explanation of changing features.
 
-- Model evaluation and comparison.
+### Important label-timing clarification
 
-- Explainability using SHAP.
+In the PhysioNet/CinC Challenge 2019 dataset, `SepsisLabel` becomes positive approximately six hours before the challenge-defined clinical sepsis time.
 
-- Explainability Stability Score (ESS).
+Therefore, this project defines its reference time as:
 
-- Risk Trajectory Visualization (RTV).
+**First positive label hour = first ICU hour with `SepsisLabel = 1`.**
 
-- Dashboard integration and testing.
+Lead-time results measured against this reference are not measurements of time before the actual clinical onset. The label is an early-warning target and must not be described as the actual onset timestamp.
 
-## 6. Data Preparation and Machine Learning Models
-### 6.1 Data Acquisition and Preprocessing
-The PhysioNet 2019 dataset was acquired and processed for machine learning implementation.
+### Alert thresholds
 
-The following activities were performed:
+The standard model threshold is selected using validation data to target recall of at least 0.80. The alert-budget analysis explores alternative thresholds to study the trade-off between detection and false alerts.
 
--Loaded and integrated the available training datasets.
+False-alert rates and lead-time summaries should be interpreted with the dataset's low positive-label prevalence in mind.
 
--Cleaned and processed the clinical observations.
+## 9. Test-set interpretation and limitations
 
--Handled missing values using appropriate imputation techniques.
+The test split was previously inspected during development. It should therefore **not be represented as a pristine, untouched independent holdout**. Existing test outputs are exploratory results for the project version in which they were generated.
 
--Performed Exploratory Data Analysis (EDA).
+For a stronger final scientific evaluation, use a new independent cohort or a properly reserved external/temporal holdout.
 
--Analysed the distribution of sepsis and non-sepsis observations.
+Other limitations:
+- Retrospective challenge-dataset evaluation is not prospective clinical validation.
+- Current-hour measurements are assumed to be available at prediction time; real-world measurement and documentation delays need separate assessment.
+- Forward filling assumes the last recorded measurement remains usable until another measurement is available.
+- qSOFA-style scoring is incomplete because GCS is unavailable.
+- Low precision can result in many false alerts.
+- SHAP and ESS do not establish causality, clinical correctness or patient benefit.
+- Dataset label timing is not equivalent to actual clinical onset timing.
 
--Performed feature engineering.
+## 10. Installation
 
--Prepared the dataset for model training.
+Install dependencies:
 
--Created patient-level training, validation, and test splits.
+```bash
+pip install -r requirements.txt
+```
 
--Prepared feature columns and supporting preprocessing objects.
+Place `training_setA.csv` and `training_setB.csv` in `data/raw/`, or configure `SEPSIS_RAW_DIR` to point to the directory containing them.
 
--Prepared the data dictionary and data-loading components for application integration.
+## 11. Running the project
 
-### 6.2 Training Data Preparation
-A training sample containing 300,000 observations and 77 features was prepared for model development.
+Open the project directory and activate the virtual environment if one is being used.
 
-The class distribution was:
+Run the dashboard after the required model and preprocessing artifacts are available:
 
-| Sepsis Label   | Number of Observations |
-|----------------|-----------------------:|
-| Non-Sepsis (0) |                294,599 |
-| Sepsis (1)     |                  5,401 |
-| **Total**      |            **300,000** |
+```bash
+streamlit run app/app.py
+```
 
-The dataset exhibited significant class imbalance, with sepsis observations representing a relatively small proportion of the training sample.
+Useful development commands:
 
-This imbalance was considered during model development and evaluation.
+```bash
+python -m pytest -q tests
+python -m src.evaluate --split val --ablation
+python -m src.explain
+python -m src.ess
+```
 
-### 6.3 Logistic Regression
+**Caution:** Do not run `python run_all.py` or `python -m src.rtv` casually on the current project state. The full pipeline can retrain models, and the current RTV main workflow reads and reports test-split results. Preserve the existing artifacts unless intentionally starting a new experiment with a clearly documented evaluation protocol.
 
-Logistic Regression was implemented as a baseline classification model for predicting sepsis risk.
+## 12. Project structure
 
-The implementation involved:
+```text
+sepsis-ai/
+??? data/
+?   ??? raw/
+?   ??? processed/
+?   ??? splits/
+??? models/
+??? results/
+?   ??? figures/
+?   ??? tables/
+??? src/
+?   ??? config.py
+?   ??? features.py
+?   ??? preprocess.py
+?   ??? models.py
+?   ??? train.py
+?   ??? evaluate.py
+?   ??? explain.py
+?   ??? ess.py
+?   ??? rtv.py
+??? app/
+??? tests/
+??? requirements.txt
+??? README.md
+```
 
-- Model training using the prepared clinical features.
-- Model configuration and tuning.
-- Validation using the validation dataset.
-- Evaluation using precision, recall, F1-score, ROC-AUC, and PR-AUC.
-- Generation of a confusion matrix.
-- Saving the trained model for future application integration.
+## 13. Intended contribution
 
-**Logistic Regression Evaluation Results**
-
-| Metric    | Non-Sepsis (0) | Sepsis (1) |
-|-----------|---------------:|-----------:|
-| Precision | 0.99           | 0.05       |
-| Recall    | 0.76           | 0.67       |
-| F1-score  | 0.86           | 0.09       |
-| Support   | 227,310        | 4,162      |
-
-Additional metrics:
-
-- Accuracy: 0.76
-
-- ROC-AUC: 0.7813
-
-- PR-AUC: 0.0726
-
-**Confusion Matrix**
-
-| Actual Class       | Predicted Non-Sepsis | Predicted Sepsis |
-|--------------------|---------------------:|-----------------:|
-| Actual Non-Sepsis  | 171,979              | 55,331           |
-| Actual Sepsis      | 1,368                | 2,794            |
-
-**Interpretation:**
-
-The Logistic Regression model achieved a sepsis recall of 0.67, indicating that it identified a considerable proportion of actual sepsis observations. However, its precision was low, indicating a high number of false-positive predictions.
-
-### 6.4 Random Forest Model
- Random Forest was implemented as an ensemble-based classification model to capture more complex relationships between clinical features.
-
-The implementation involved:
-
-- Model development and hyperparameter tuning.
-  
-- Training using the prepared dataset.
-  
-- Validation and performance evaluation.
-
-- Generation of feature importance results.
-
-- Saving the trained model.
-
-- Preparing model outputs for explainability and application integration.
-
- **Random Forest Evaluation Results**
-
-| Metric    | Non-Sepsis (0) | Sepsis (1) |
-|-----------|---------------:|-----------:|
-| Precision | 0.99           | 0.10       |
-| Recall    | 0.96           | 0.24       |
-| F1-score  | 0.97           | 0.15       |
-| Support   | 227,310        | 4,162      |
-
-**Additional Metrics:**
-- Accuracy: 0.95
-- ROC-AUC: 0.7954
-- PR-AUC: 0.0711
-
-**Confusion Matrix**
-
-| Actual Class       | Predicted Non-Sepsis | Predicted Sepsis |
-|--------------------|---------------------:|-----------------:|
-| Actual Non-Sepsis  | 218,617              | 8,693            |
-| Actual Sepsis      | 3,151                | 1,011            |
-
-**Interpretation:**
-
-The Random Forest model achieved a higher ROC-AUC (0.7954) and overall accuracy (0.95) than Logistic Regression. However, its recall for sepsis cases was lower (0.24 compared to 0.67), indicating that it missed a larger proportion of actual sepsis observations.
+This project brings together patient-level data splitting, past-only temporal feature engineering, machine-learning model comparison, probability calibration, SHAP-based explainability, explanation stability analysis and patient-level risk trajectories in one reproducible academic prototype.
