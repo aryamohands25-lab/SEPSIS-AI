@@ -5,7 +5,7 @@ An academic machine-learning prototype for hourly sepsis-risk prediction using I
 
 ## 🚀 Live Demo
 
-**[Open SEPSIS-AI Live Dashboard](https://sepsis-ai-lmjw7f3k7myvdfuycgoegr.streamlit.app/)**
+**[Open SEPSIS-AI Live Dashboard](https://sepsis-ai-hntk2rf8dectj5cbmxttxi.streamlit.app/)**
 
 
 > **Disclaimer:** This is a research and educational prototype. It is not clinically validated and must not be used to diagnose, treat or make decisions about patients.
