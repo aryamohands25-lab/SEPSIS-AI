@@ -15,8 +15,40 @@ An academic machine-learning prototype for hourly sepsis-risk prediction using I
 Raw ICU data ? cleaning ? temporal feature engineering ? patient-level splitting ? model training ? validation and calibration ? SHAP explanations ? Explanation Stability Score (ESS) ? Risk Trajectory Visualization (RTV).
 
 ## 2. Dataset and splitting
+## Dataset Attribution and Licence
 
-- Uses the PhysioNet/CinC Challenge 2019 training datasets (Set A and Set B).
+This project uses the PhysioNet/CinC Challenge 2019
+training datasets (Set A and Set B).
+
+Original dataset:
+Reyna et al. (2019). Early Prediction of Sepsis From
+Clinical Data: The PhysioNet/Computing in Cardiology
+Challenge. PhysioNet, version 1.0.0.
+
+DOI: https://doi.org/10.13026/v64v-d857
+
+Dataset page:
+https://physionet.org/content/challenge-2019/1.0.0/
+
+Dataset licence: Creative Commons Attribution 4.0
+International (CC BY 4.0):
+https://creativecommons.org/licenses/by/4.0/
+
+The dataset was processed and divided into
+patient-level training, validation and test splits
+for this research project. Model outputs and
+visualizations are derived from the processed data.
+
+This project is an independent research project and
+is not affiliated with or endorsed by PhysioNet.
+
+## Research Disclaimer
+
+This dashboard is an academic research prototype.
+It is not a medical device and must not be used for
+clinical diagnosis, treatment or patient-care decisions.
+
+
 - Combined cohort: **40,336 patients**.
 - Patient-level stratified split: 70% training, 15% validation and 15% test.
 - Random seed: 42.
