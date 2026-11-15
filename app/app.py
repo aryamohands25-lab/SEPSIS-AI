@@ -38,29 +38,35 @@ st.warning(
 # LOAD DATA
 # --------------------------------------------------
 
-REAL_DATA_ROOT = Path(
-    r"C:\Users\Arya\Downloads\sepsis-ai-ready\sepsis-ai-ready\sepsis-ai"
-)
+from pathlib import Path
+
+REAL_DATA_ROOT = C.ROOT
 
 @st.cache_data
 def load_tables(dataset_mode):
     if dataset_mode == "Synthetic demo":
         rs = C.read_table(C.TABLES / "risk_series_demo.parquet")
         vit = C.read_table(C.DATA_PROC / "demo.parquet")
-        ess = None
-        return rs, ess, vit
+        return rs, None, vit
 
     if dataset_mode == "PhysioNet research":
-        risk_path = REAL_DATA_ROOT / "results" / "tables" / "risk_series.parquet"
-        vit_path = REAL_DATA_ROOT / "data" / "processed" / "test.parquet"
-        ess_path = REAL_DATA_ROOT / "results" / "tables" / "ess_scores.parquet"
+        risk_path = C.TABLES / "risk_series.parquet"
+        test_path = C.ROOT / "demo_data" / "test.pkl"
+        ess_path = C.TABLES / "ess_scores.parquet"
 
-        if not risk_path.exists() or not vit_path.exists():
-            raise FileNotFoundError("PhysioNet data files not found.")
+        if not risk_path.exists() or not test_path.exists():
+            raise FileNotFoundError("PhysioNet research files are missing.")
 
-        rs = pd.read_pickle(risk_path)
-        vit = pd.read_pickle(vit_path)
-        ess = pd.read_pickle(ess_path) if ess_path.exists() else None
+        rs = C.read_table(risk_path)
+        vit = pd.read_pickle(test_path)
+        ess = C.read_table(ess_path) if ess_path.exists() else None
+
+        test_ids = set(vit["patient_id"].unique())
+        rs = rs[rs["patient_id"].isin(test_ids)].copy()
+
+        if ess is not None:
+            ess = ess[ess["patient_id"].isin(test_ids)].copy()
+
         return rs, ess, vit
 
     raise ValueError("Unknown dataset mode")
@@ -69,15 +75,15 @@ def load_tables(dataset_mode):
 available_modes = ["Synthetic demo"]
 
 if (
-    (REAL_DATA_ROOT / "results" / "tables" / "risk_series.parquet").exists()
-    and (REAL_DATA_ROOT / "data" / "processed" / "test.parquet").exists()
+    (C.TABLES / "risk_series.parquet").exists()
+    and (C.ROOT / "demo_data" / "test.pkl").exists()
 ):
     available_modes.append("PhysioNet research")
 
 dataset_mode = st.sidebar.selectbox(
     "Dataset",
     available_modes,
-    index=0,
+    index=available_modes.index("PhysioNet research") if "PhysioNet research" in available_modes else 0,
     key="dataset_mode"
 )
 
@@ -87,7 +93,11 @@ except Exception as exc:
     st.error(f"Could not load selected dataset: {exc}")
     st.stop()
 
-thr = THRESHOLD
+if dataset_mode == "Synthetic demo":
+    thr = THRESHOLD
+else:
+    from src.models import load_thresholds
+    thr = load_thresholds()["xgb"]
 
 # --------------------------------------------------
 # SIDEBAR NAVIGATION
@@ -523,7 +533,7 @@ elif page == "ESS Stability":
             width="stretch"
         )
 
-        tables = REAL_DATA_ROOT / "results" / "tables"
+        tables = C.TABLES
         validation = tables / "ess_validation.csv"
         unstable = tables / "ess_unstable_features.csv"
 
@@ -552,8 +562,8 @@ elif page == "SHAP Explainability":
     if dataset_mode != "PhysioNet research":
         st.info("Original SHAP research outputs are available in PhysioNet mode.")
     else:
-        tables = REAL_DATA_ROOT / "results" / "tables"
-        figures = REAL_DATA_ROOT / "results" / "figures"
+        tables = C.TABLES
+        figures = C.FIGURES
         importance_path = tables / "shap_importance.csv"
 
         if importance_path.exists():
@@ -616,7 +626,7 @@ elif page == "Model comparison":
     if dataset_mode != "PhysioNet research":
         st.info("Original model evaluation results are available in PhysioNet mode.")
     else:
-        tables = REAL_DATA_ROOT / "results" / "tables"
+        tables = C.TABLES
 
         for title, filename in [
             ("Test-set model comparison", "model_comparison_test.csv"),
@@ -675,3 +685,5 @@ else:
         "The public demonstration is separate from the original "
         "research evaluation dataset and its patient-level outputs."
     )
+
+
