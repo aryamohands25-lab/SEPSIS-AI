@@ -17,9 +17,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from src import config as C
-from src.explain import explain
-from src.models import load_thresholds
-from src.rtv import what_changed
+from src.synthetic_demo import explain, what_changed, THRESHOLD
 
 
 # --------------------------------------------------
@@ -40,36 +38,60 @@ st.warning(
 # LOAD DATA
 # --------------------------------------------------
 
+REAL_DATA_ROOT = Path(
+    r"C:\Users\Arya\Downloads\sepsis-ai-ready\sepsis-ai-ready\sepsis-ai"
+)
+
 @st.cache_data
-def load_tables():
-    rs = C.read_table(C.TABLES / "risk_series.parquet")
+def load_tables(dataset_mode):
+    if dataset_mode == "Synthetic demo":
+        rs = C.read_table(C.TABLES / "risk_series_demo.parquet")
+        vit = C.read_table(C.DATA_PROC / "demo.parquet")
+        ess = None
+        return rs, ess, vit
 
-    ess = (
-        C.read_table(C.TABLES / "ess_scores.parquet")
-        if (C.TABLES / "ess_scores.parquet").exists()
-        else None
-    )
+    if dataset_mode == "PhysioNet research":
+        risk_path = REAL_DATA_ROOT / "results" / "tables" / "risk_series.parquet"
+        vit_path = REAL_DATA_ROOT / "data" / "processed" / "test.parquet"
+        ess_path = REAL_DATA_ROOT / "results" / "tables" / "ess_scores.parquet"
 
-    demo_path = C.ROOT / "demo_data" / "test.pkl"
-    test = pd.read_pickle(demo_path)
+        if not risk_path.exists() or not vit_path.exists():
+            raise FileNotFoundError("PhysioNet data files not found.")
 
-    demo_ids = test["patient_id"].unique()
-    rs = rs[rs["patient_id"].isin(demo_ids)].copy()
+        rs = pd.read_pickle(risk_path)
+        vit = pd.read_pickle(vit_path)
+        ess = pd.read_pickle(ess_path) if ess_path.exists() else None
+        return rs, ess, vit
 
-    if ess is not None and "patient_id" in ess.columns:
-        ess = ess[ess["patient_id"].isin(demo_ids)].copy()
-
-    return rs, ess, test
-
-
-@st.cache_resource
-def thresholds():
-    return load_thresholds()
+    raise ValueError("Unknown dataset mode")
 
 
-rs, ess, vit = load_tables()
-thr = thresholds()["xgb"]
+available_modes = ["Synthetic demo"]
 
+if (
+    (REAL_DATA_ROOT / "results" / "tables" / "risk_series.parquet").exists()
+    and (REAL_DATA_ROOT / "data" / "processed" / "test.parquet").exists()
+):
+    available_modes.append("PhysioNet research")
+
+dataset_mode = st.sidebar.selectbox(
+    "Dataset",
+    available_modes,
+    index=0,
+    key="dataset_mode"
+)
+
+try:
+    rs, ess, vit = load_tables(dataset_mode)
+except Exception as exc:
+    st.error(f"Could not load selected dataset: {exc}")
+    st.stop()
+
+thr = THRESHOLD
+
+# --------------------------------------------------
+# SIDEBAR NAVIGATION
+# --------------------------------------------------
 
 # --------------------------------------------------
 # SIDEBAR NAVIGATION
@@ -80,8 +102,10 @@ page = st.sidebar.radio(
     [
         "Patient view",
         "Risk trajectory (RTV)",
-        "Explanation (SHAP + ESS)",
+        "Synthetic explanations",
         "Vitals",
+        "ESS Stability",
+        "SHAP Explainability",
         "Model comparison",
         "About / limitations"
     ]
@@ -113,7 +137,7 @@ if len(ids) == 0:
     st.error("No patients available in the selected patient pool.")
     st.stop()
 
-pid = st.sidebar.selectbox("Select Patient ID", options=ids, format_func=lambda x: str(x), key="selected_patient")
+pid = st.sidebar.selectbox("Select Patient ID", options=ids, format_func=lambda x: str(x), key=f"selected_patient_{dataset_mode}")
 
 p = rs[rs.patient_id == pid].reset_index(drop=True)
 
@@ -265,7 +289,7 @@ elif page == "Risk trajectory (RTV)":
 
     fig.update_layout(
         xaxis_title="ICU hour",
-        yaxis_title="Calibrated risk",
+        yaxis_title="Illustrative index",
         height=380
     )
 
@@ -274,61 +298,56 @@ elif page == "Risk trajectory (RTV)":
         width="stretch"
     )
 
-    st.subheader(
-        f"What changed in the last 6 hours (hour {hour})"
-    )
+    if dataset_mode == "Synthetic demo":
+        st.info("Synthetic illustrative index only; not a clinical risk prediction.")
+        st.subheader(
+            f"Descriptive changes over the previous 6 hours (hour {hour})"
+        )
 
-    w = what_changed(pid, hour, split="demo")
+        w = what_changed(pid, hour, split="demo")
 
-    c1, c2 = st.columns(2)
+        c1, c2 = st.columns(2)
 
-    c1.markdown(
-        "**Pushed risk up**\n\n" +
-        "\n\n".join(
-            f"- {l}"
-            for l in w["text"]
-            if "+" in l.split(":")[-1]
-        ) or "-"
-    )
+        c1.markdown(
+            "**Pushed risk up**\n\n" +
+            "\n\n".join(
+                f"- {l}"
+                for l in w["text"]
+                if "+" in l.split(":")[-1]
+            ) or "-"
+        )
 
-    c2.markdown(
-        "**Pushed risk down**\n\n" +
-        "\n\n".join(
-            f"- {l}"
-            for l in w["text"]
-            if "-" in l.split(":")[-1].split("(")[0]
-        ) or "-"
-    )
+        c2.markdown(
+            "**Pushed risk down**\n\n" +
+            "\n\n".join(
+                f"- {l}"
+                for l in w["text"]
+                if "-" in l.split(":")[-1].split("(")[0]
+            ) or "-"
+        )
 
 
 # --------------------------------------------------
 # PAGE 3: EXPLANATION (SHAP + ESS)
 # --------------------------------------------------
 
-elif page == "Explanation (SHAP + ESS)":
+elif page == "Synthetic explanations":
 
-    st.title("Model Explanation")
+    if dataset_mode != "Synthetic demo":
+        st.info("This illustrative explanation is only available in Synthetic demo mode.")
+        st.stop()
+
+    st.title("Synthetic Feature Explanation")
     e = explain(pid, hour, split="demo")
 
 
 
-    top = (
-        e["shap"]
-        .reindex(
-            e["shap"].abs()
-            .sort_values(ascending=False)
-            .index
-        )
-        .head(12)[::-1]
-    )
+    top = e["components"].head(12)[::-1]
 
     fig = go.Figure(
         go.Bar(
             x=top.values,
-            y=[
-                f"{k} = {e['features'][k]:.3g}"
-                for k in top.index
-            ],
+            y=list(top.index),
             orientation="h",
             marker_color=[
                 "#c1121f" if v > 0 else "#2a6f97"
@@ -338,7 +357,7 @@ elif page == "Explanation (SHAP + ESS)":
     )
 
     fig.update_layout(
-        title="Top contributions (log-odds; red raises risk)",
+        title="Illustrative rule components (not model contributions)",
         height=450
     )
 
@@ -346,6 +365,8 @@ elif page == "Explanation (SHAP + ESS)":
         fig,
         width="stretch"
     )
+
+    st.info("Illustrative synthetic rule components only. Not SHAP, not model explanations, and not clinical evidence.")
 
     if ess is not None:
 
@@ -379,6 +400,11 @@ elif page == "Explanation (SHAP + ESS)":
                     ["patient_id", "hour", "ess", "level"]
                 ].head(30)
             )
+
+    else:
+        st.info(
+            "ESS stability is not available. These synthetic rule components are illustrative only."
+        )
 
 
 # --------------------------------------------------
@@ -420,75 +446,191 @@ elif page == "Model comparison":
 
     st.title("Model Performance Comparison")
 
-    f = C.TABLES / "model_comparison_test.csv"
-
-    if f.exists():
-
-        st.subheader("Model evaluation metrics")
-
-        st.dataframe(
-            pd.read_csv(f, index_col=0).round(4)
-        )
-
-    else:
-
-        st.info(
-            "Run `python -m src.evaluate --split test --final` first."
-        )
-
-    # Corrected image display block
-    curves_file = C.FIGURES / "curves_test.png"
-
-    if curves_file.exists():
-
-        st.subheader("Model Performance Curves")
-
-        st.image(
-            str(curves_file)
-        )
-
-    # Alert budget analysis
-    bt = pd.read_csv(
-        C.TABLES / "alert_budget_table.csv"
+    st.info(
+        "This public demonstration uses fictional synthetic patient records. "
+        "The original model evaluation metrics, performance curves, and "
+        "alert-budget results are not displayed here because they were "
+        "generated from a separate evaluation dataset."
     )
 
-    st.subheader("Alert Budget Analysis")
-
-    b = st.select_slider(
-        "Allowed false alerts per 10 patient-days",
-        bt.budget_false_alerts_per_10pd.tolist(),
-        5
+    st.warning(
+        "The synthetic demonstration data is not a benchmark dataset. "
+        "No model accuracy, clinical performance, or generalisation claim "
+        "should be inferred from the displayed synthetic patient examples."
     )
 
-    r = bt[
-        bt.budget_false_alerts_per_10pd == b
-    ].iloc[0]
-
-    a, b2, c = st.columns(3)
-
-    a.metric(
-        "Threshold (from validation)",
-        f"{r.threshold:.3f}"
+    st.subheader("Models included in the research project")
+    st.write(
+        "- Logistic Regression (LR)\n"
+        "- Random Forest (RF)\n"
+        "- XGBoost (XGB)"
     )
 
-    b2.metric(
-        "Septic patients alerted",
-        f"{r['alerted_%']:.0f}%"
-    )
-
-    c.metric(
-        "Median lead time",
-        f"{r.median_lead_h:.0f} h"
-    )
-
-    st.subheader("Complete Alert Budget Table")
-
-    st.dataframe(
-        bt.round(3)
+    st.caption(
+        "A separately documented and reviewed research evaluation "
+        "may be presented in a future version."
     )
 
 
 # --------------------------------------------------
+# PAGE: ESS STABILITY
+# --------------------------------------------------
+
+elif page == "ESS Stability":
+
+    st.title("Explanation Stability Score (ESS)")
+
+    if dataset_mode != "PhysioNet research" or ess is None:
+        st.info("ESS research results are available in PhysioNet research mode.")
+    else:
+        st.caption(
+            "Original research ESS sample. These 100 sampled patient-hour "
+            "observations are not the full test cohort."
+        )
+
+        st.metric("ESS observations", len(ess))
+        st.metric("Mean ESS", f"{ess['ess'].mean():.3f}")
+        st.metric("Median ESS", f"{ess['ess'].median():.3f}")
+
+        st.subheader("ESS distribution")
+        fig = go.Figure(go.Histogram(x=ess["ess"], nbinsx=15))
+        fig.update_layout(xaxis_title="ESS", yaxis_title="Observations")
+        st.plotly_chart(fig, width="stretch")
+
+        st.subheader("Stability components")
+        components = [
+            c for c in [
+                "ess_spearman", "ess_jaccard",
+                "ess_seed", "ess_noise", "ess_model"
+            ] if c in ess.columns
+        ]
+        if components:
+            means = ess[components].mean().sort_values()
+            fig = go.Figure(go.Bar(
+                x=means.values, y=means.index, orientation="h"
+            ))
+            fig.update_layout(
+                title="Mean ESS component scores",
+                xaxis_title="Mean score"
+            )
+            st.plotly_chart(fig, width="stretch")
+
+        st.subheader("ESS by stability level")
+        st.dataframe(
+            ess.groupby("level")["ess"].agg(
+                ["count", "mean", "median", "min", "max"]
+            ).round(4),
+            width="stretch"
+        )
+
+        tables = REAL_DATA_ROOT / "results" / "tables"
+        validation = tables / "ess_validation.csv"
+        unstable = tables / "ess_unstable_features.csv"
+
+        if validation.exists():
+            st.subheader("ESS validation summary")
+            st.dataframe(pd.read_csv(validation), width="stretch")
+
+        if unstable.exists():
+            st.subheader("Features with highest instability")
+            u = pd.read_csv(unstable)
+            u = u.rename(columns={"Unnamed: 0": "feature"})
+            st.dataframe(u, width="stretch")
+
+        st.subheader("Sampled patient-hour ESS records")
+        st.dataframe(ess, width="stretch")
+
+
+# --------------------------------------------------
+# PAGE: SHAP EXPLAINABILITY
+# --------------------------------------------------
+
+elif page == "SHAP Explainability":
+
+    st.title("SHAP Explainability")
+
+    if dataset_mode != "PhysioNet research":
+        st.info("Original SHAP research outputs are available in PhysioNet mode.")
+    else:
+        tables = REAL_DATA_ROOT / "results" / "tables"
+        figures = REAL_DATA_ROOT / "results" / "figures"
+        importance_path = tables / "shap_importance.csv"
+
+        if importance_path.exists():
+            shap_df = pd.read_csv(importance_path)
+            shap_df = shap_df.rename(
+                columns={"Unnamed: 0": "feature"}
+            ).sort_values("mean_abs_shap", ascending=False)
+
+            st.caption(
+                "Global mean absolute SHAP importance from the original "
+                "research evaluation. This is not a patient-specific explanation."
+            )
+
+            st.subheader("Top 20 influential features")
+            top = shap_df.head(20).sort_values("mean_abs_shap")
+            fig = go.Figure(go.Bar(
+                x=top["mean_abs_shap"],
+                y=top["feature"],
+                orientation="h"
+            ))
+            fig.update_layout(
+                height=650,
+                xaxis_title="Mean absolute SHAP value",
+                yaxis_title="Feature"
+            )
+            st.plotly_chart(fig, width="stretch")
+
+            with st.expander("View all 115 SHAP features"):
+                st.dataframe(shap_df, width="stretch")
+        else:
+            st.error("SHAP importance CSV not found.")
+
+        st.subheader("Original SHAP research figures")
+
+        image_files = [
+            ("SHAP bar plot", "shap_bar.png"),
+            ("SHAP beeswarm plot", "shap_beeswarm.png"),
+            ("False-negative waterfall", "shap_waterfall_false_negative.png"),
+            ("High-risk true-positive waterfall",
+             "shap_waterfall_high_risk_true_positive.png"),
+            ("Low-risk true-negative waterfall",
+             "shap_waterfall_low_risk_true_negative.png"),
+        ]
+
+        for title, filename in image_files:
+            image_path = figures / filename
+            if image_path.exists():
+                st.markdown(f"**{title}**")
+                st.image(str(image_path), width="stretch")
+
+
+# --------------------------------------------------
+# PAGE: MODEL COMPARISON AND RESEARCH EVALUATION
+# --------------------------------------------------
+
+elif page == "Model comparison":
+
+    st.title("Model Performance Comparison")
+
+    if dataset_mode != "PhysioNet research":
+        st.info("Original model evaluation results are available in PhysioNet mode.")
+    else:
+        tables = REAL_DATA_ROOT / "results" / "tables"
+
+        for title, filename in [
+            ("Test-set model comparison", "model_comparison_test.csv"),
+            ("Validation-set model comparison", "model_comparison_val.csv"),
+            ("Subgroup evaluation (test)", "subgroups_xgb_test.csv"),
+            ("Subgroup evaluation (validation)", "subgroups_xgb_val.csv"),
+            ("Alert-budget evaluation", "alert_budget_table.csv"),
+            ("RTV lead-time comparison", "rtv_lead_time.csv"),
+        ]:
+            path = tables / filename
+            if path.exists():
+                st.subheader(title)
+                st.dataframe(pd.read_csv(path), width="stretch")
+
 # PAGE 6: ABOUT AND LIMITATIONS
 # --------------------------------------------------
 
@@ -497,48 +639,39 @@ else:
     st.title("About SEPSIS-AI")
 
     st.markdown("""
-    **Data**
+    **Public demonstration data**
 
-    PhysioNet/CinC Challenge 2019 (training sets A and B),
-    hourly ICU data, vitals + labs + demographics.
+    This dashboard uses 20 fictional synthetic patient profiles,
+    with 24 hourly records per profile. The records were generated
+    specifically for demonstrating the dashboard interface.
 
-    **Onset**
+    **Synthetic demonstration index**
 
-    First hour with `SepsisLabel = 1`.
+    The displayed index is generated from transparent, hand-written
+    illustrative rules. It is not produced by a trained model and is
+    not a probability of sepsis.
+
+    **Descriptive explanations**
+
+    Feature changes are descriptive synthetic examples, not SHAP values,
+    model explanations, or clinical causes.
 
     **ESS**
 
-    Stability of the SHAP explanation across seeds,
-    input noise and a second model (0-1).
+    Explanation stability has not yet been evaluated on this
+    synthetic demonstration dataset.
 
-    **RTV**
+    **Important limitations**
 
-    Risk over time with first-alert hour and lead time.
-
-    **Limitations**
-
-    - Single retrospective dataset.
-    - ICU data only.
-    - Imperfect sepsis labels.
-    - Possible subgroup performance gaps.
-    - SHAP shows model associations, not causes.
-    - ESS measures explanation stability, not correctness.
-    - Not validated for clinical use.
+    - Synthetic records are fictional and are not real patient cases.
+    - Synthetic examples are not a model performance benchmark.
+    - No clinical accuracy or generalisation claim should be inferred.
+    - Synthetic rule components are not SHAP explanations.
+    - This academic prototype is not validated for clinical use.
+    - It must not be used for diagnosis or treatment decisions.
     """)
 
-    subgroup_files = sorted(
-        C.TABLES.glob("subgroups_xgb_*.csv")
+    st.caption(
+        "The public demonstration is separate from the original "
+        "research evaluation dataset and its patient-level outputs."
     )
-
-    if subgroup_files:
-
-        latest_file = subgroup_files[-1]
-
-        st.subheader(
-            "Subgroup Results (XGBoost)"
-        )
-
-        st.dataframe(
-            pd.read_csv(latest_file).round(3)
-        )
-

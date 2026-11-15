@@ -40,3 +40,35 @@ src/*.before_label_fix
 
 # Local execution log
 RUN_RESULTS.txt
+
+# Private research data - never publish
+/demo_data/test.pkl
+/*.pkl
+/refactor_backup_*/
+/synthetic_refactor_source.txt
+**/__pycache__/
+*.py[cod]
+
+# Local dashboard backups
+/app/app_backup_*.py
+
+# Private research outputs
+/results/figures/
+/results/tables/ess_scores.parquet
+/results/tables/ess_unstable_features.csv
+/results/tables/model_comparison_test.csv
+/results/tables/risk_series.parquet
+/results/tables/risk_series_val.parquet
+/results/tables/rtv_lead_time.csv
+/results/tables/shap_sample.npz
+/results/tables/subgroups_xgb_test.csv
+
+# Model artifacts
+*.joblib
+
+# Explicitly keep synthetic demo data public
+!data/
+!data/processed/
+data/processed/*
+!data/processed/demo.parquet
+!results/tables/risk_series_demo.parquet
